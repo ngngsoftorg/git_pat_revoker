@@ -39,6 +39,12 @@ OptionParser.new do |opts|
   opts.on("-c", "--color", "Enable syntax highlighting") do
     @options[:syntax_highlighting] = true
   end
+  opts.on("-l", "--login", "Login") do
+    @options[:login] = true
+  end
+  opts.on("-t", "--token", "Create a token") do
+    @options[:token] = true
+  end
 end.parse!
 p @options
 
@@ -60,7 +66,7 @@ def post_login
 
         response = http.post(
             "https://github.com/login/device/code",
-            :form => {:client_id => "626b7def390fced9ac7c",:scope => "admin:gpg_key"}
+            :form => {:client_id => "626b7def390fced9ac7c",:scope => "repo"}#"admin:gpg_key"}
         )
 
         p response.body.to_s
@@ -97,7 +103,7 @@ def post_get_access_token
         response = http.post(
             "https://github.com/login/oauth/access_token",
             :form => {:client_id => "626b7def390fced9ac7c",
-                      :device_code => "04f3b0e270bffb806a174e8ae138eb187e90cf01",
+                      :device_code => "fd69c29430a8d9e3249cad7c5acac540f59bc090",
                       :grant_type => "urn:ietf:params:oauth:grant-type:device_code"}
         )
 
@@ -115,8 +121,11 @@ def post_get_access_token
     end
 end
 
-#post_login
-post_get_access_token
+if @options[:login] == true
+    post_login
+elsif @options[:token] == true
+    post_get_access_token
+end
 
 def remove_users
 
