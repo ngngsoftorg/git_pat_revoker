@@ -24,6 +24,7 @@
 require 'logger'
 require 'http'
 require 'optparse'
+require 'uri'
 
 
 @logger = Logger.new(STDOUT)
@@ -42,11 +43,11 @@ OptionParser.new do |opts|
   opts.on("-l", "--login", "Login") do
     @options[:login] = true
   end
-  opts.on("-t", "--token", "Create a token") do
-    @options[:token] = true
+  opts.on("-s", "--store", "Store a token") do
+    @options[:store] = true
   end
 end.parse!
-p @options
+#p @options
 
 
 def post_login
@@ -69,8 +70,13 @@ def post_login
             :form => {:client_id => "626b7def390fced9ac7c",:scope => "repo"}#"admin:gpg_key"}
         )
 
-        p response.body.to_s
-    
+        json = URI.decode_www_form(response.body.to_s)
+        p json[3][1]
+        p json
+        # figure out how to submit this open with the user_code in the response body
+        system "open https://github.com/login/device"
+        $stdin.gets.chomp
+        return json[0][1]
     rescue StandardError => e
 
         @error.fatal(e.message)
@@ -85,7 +91,7 @@ end
 
 
 
-def post_get_access_token
+def post_get_access_token(device_code)
     begin
 
         ssl_context = OpenSSL::SSL::SSLContext.new
@@ -103,12 +109,13 @@ def post_get_access_token
         response = http.post(
             "https://github.com/login/oauth/access_token",
             :form => {:client_id => "626b7def390fced9ac7c",
-                      :device_code => "fd69c29430a8d9e3249cad7c5acac540f59bc090",
+                      :device_code => device_code,
                       :grant_type => "urn:ietf:params:oauth:grant-type:device_code"}
         )
 
-        p response.body.to_s
-    
+        json = URI.decode_www_form(response.body.to_s)
+        p json
+        return json[0][1]
     rescue StandardError => e
 
         @error.fatal(e.message)
@@ -121,10 +128,26 @@ def post_get_access_token
     end
 end
 
+
+def store_creds(access_code)
+    #system "echo \"\nprotocol=https\nhost=github.com\n\""
+    #system "git credential-osxkeychain erase\nprotocol=https\nhost=github.com\n\""
+
+    system "echo \"\\\n"\
+            "protocol=https\n"\
+            "host=github.com\" | git credential-osxkeychain erase\n"
+    sleep(1)
+    system "echo \"\\\n"\
+            "protocol=https\n"\
+            "host=github.com\n"\
+            "username=ng@ngsoft.org\n"\
+            "password=#{access_code}\" | git credential-osxkeychain store\n"
+end
+
 if @options[:login] == true
-    post_login
-elsif @options[:token] == true
-    post_get_access_token
+    store_creds(post_get_access_token(post_login))
+elsif @options[:store] == true
+    store_creds("1234")
 end
 
 def remove_users
