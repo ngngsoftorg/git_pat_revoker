@@ -27,7 +27,9 @@ Usage: bundle exec bin/revoker.rb [options]
 `> git clone https://github.com/ngngsoftorg/git_pat_revoker.git`
 
 ## Installing the code
-`> rbenv shell 3.0.0`
-`> bundle install`
+```
+> rbenv shell 3.0.0
+> bundle install
+```
 
 
