@@ -14,15 +14,15 @@ One possible solution is to enforce a revocation policy (daily, weekly, every 48
 ### To revoke a specific user's token, run this command:
 > bundle exec bin/revoker.rb -r forgeglobal ngrabowski
 
-> Usage: bundle exec bin/revoker.rb [options]
->   -v, --verbose                    Show extra information
->   -h, --help                       Show this message
->   -r, --revoke ORG                 Revokes all SAML SSO tokens for users in a given org
->   -n, --name NAME                  Revokes SAML SSO token for named user in a given org
->   -l, --list ORG                   List all SAML SSO tokens for users in a given org
+Usage: bundle exec bin/revoker.rb [options]
+   -v, --verbose                    Show extra information
+   -h, --help                       Show this message
+   -r, --revoke ORG                 Revokes all SAML SSO tokens for users in a given org
+   -n, --name NAME                  Revokes SAML SSO token for named user in a given org
+   -l, --list ORG                   List all SAML SSO tokens for users in a given org
 
 ## Getting the code
-> git clone https://....
+> git clone https://github.com/ngngsoftorg/git_pat_revoker.git
 > bundle install
 
 
