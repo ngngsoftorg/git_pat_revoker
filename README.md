@@ -22,8 +22,8 @@ Usage: bundle exec bin/revoker.rb [options]
    -n, --name NAME                  Revokes SAML SSO token for named user in a given org
    -l, --list ORG                   List all SAML SSO tokens for users in a given org
 ```
-The app assumes an environment variable GITHUB_ACCESS_TOKEN will be set witha valid token with admin:org scope.
-This could be a personal access token as well. Although it should be for a bot account (and hence not in the SAML SSO org.
+The app assumes an environment variable GITHUB_ACCESS_TOKEN will be set with a valid token where the token's scope is _admin:org_.
+This could be a personal access token as well. Although it should be for a bot account (and hence not in the SAML SSO org, otherswise you'll revoke your own token).
 
 ## Getting the code
 `> git clone https://github.com/ngngsoftorg/git_pat_revoker.git`
