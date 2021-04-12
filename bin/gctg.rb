@@ -29,7 +29,8 @@ require 'uri'
 
 @logger = Logger.new(STDOUT)
 @error = Logger.new(STDERR)
-
+@username = ENV['USERNAME']
+@client_id = ENV['CLIENT_ID']
 
 
 @options = {}
@@ -45,6 +46,9 @@ OptionParser.new do |opts|
   end
   opts.on("-s", "--store", "Store a token") do
     @options[:store] = true
+  end
+  opts.on("-t", "--list", "List tokens") do
+    @options[:list_token] = true
   end
 end.parse!
 #p @options
@@ -67,7 +71,7 @@ def post_login
 
         response = http.post(
             "https://github.com/login/device/code",
-            :form => {:client_id => "626b7def390fced9ac7c",:scope => "repo"}#"admin:gpg_key"}
+            :form => {:client_id => @client_id,:scope => "repo"}#"admin:gpg_key"}
         )
 
         json = URI.decode_www_form(response.body.to_s)
@@ -108,7 +112,7 @@ def post_get_access_token(device_code)
 
         response = http.post(
             "https://github.com/login/oauth/access_token",
-            :form => {:client_id => "626b7def390fced9ac7c",
+            :form => {:client_id => @client_id,
                       :device_code => device_code,
                       :grant_type => "urn:ietf:params:oauth:grant-type:device_code"}
         )
@@ -132,7 +136,6 @@ end
 def store_creds(access_code)
     #system "echo \"\nprotocol=https\nhost=github.com\n\""
     #system "git credential-osxkeychain erase\nprotocol=https\nhost=github.com\n\""
-
     system "echo \"\\\n"\
             "protocol=https\n"\
             "host=github.com\" | git credential-osxkeychain erase\n"
@@ -140,84 +143,13 @@ def store_creds(access_code)
     system "echo \"\\\n"\
             "protocol=https\n"\
             "host=github.com\n"\
-            "username=ng@ngsoft.org\n"\
+            "username=#{@username}\n"\
             "password=#{access_code}\" | git credential-osxkeychain store\n"
 end
+
 
 if @options[:login] == true
     store_creds(post_get_access_token(post_login))
 elsif @options[:store] == true
     store_creds("1234")
 end
-
-def remove_users
-
-  # load the emails from a file
-  arr_of_rows = CSV.read(ARGV[0], headers: true)
-
-  @logger.info("read emails from file #{ARGV[0]}")
-  result = 0
-
-  arr_of_rows.each do |row|
-    unless (URI::MailTo::EMAIL_REGEXP =~ row[0]) == nil then
-      result = result + remove(row)
-    else
-      @logger.info("invlaid email #{row[0]} ... skipping")
-    end
-  end
-
-  @logger.info("gdpr'd #{result.to_s} accounts")
-end
-
-
-def remove(row)
-
-  @logger.info("gdpr account #{row[0]}")
-  current_email = row[0]
-
-  random = rand(10000000)
-  new_email = Time.now.strftime("%Y-%m-%d") + "-#{random.to_s}@gdpr_delete_request.com"
-  result = 0
-
-  #http = HTTP #.use(logging: {logger: logger})  
-  uri = URI.parse(ENV['SHAREX_DATABASE_URL'])
-  host = uri.hostname
-  user = uri.user
-  password = uri.password
-  port = uri.port
-  db = uri.path[1..-1]
-  con = nil
-
-  begin
-    con = PG.connect host: host, port: port, dbname: db, user: user, password: password
-
-    raise 'ERROR could not open con' unless con
-
-    # run the job for buyers
-    rs = con.exec("update accounts set email='#{new_email}', phone='555-555-5555'," \
-            "zip_code=null,first_name='gdpr',last_name='gdpr'," \
-            "active_us_address=null,last_login_from_ip_address=null," \
-            "government_id_id=null where lower(email) = lower('#{current_email}');")
-
-    if rs.cmd_tuples < 1 then
-      @logger.info("No account was gdpr'd: #{rs.inspect.to_s}")
-    else
-      @logger.info("Result : #{rs.cmd_tuples.to_s} account gdpr'd")
-      result = 1
-    end
-
-  rescue StandardError => e
-    @logger.fatal(e.message)
-    @logger.fatal(e.backtrace)
-    @logger.fatal('ERROR unable to remove gdpr account')
-    exit(1)
-  ensure
-    unless con == nil
-      con&.close
-    end
-  end
-
-  return result
-end
-
-
