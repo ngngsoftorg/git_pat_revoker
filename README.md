@@ -1,10 +1,10 @@
 # git_pat_revoker
-Revokes all PATs in a given SAML SSO org. This should be used iin conjuction with policues to enforce periodic access token refreshes.
+Revokes all PATs in a given SAML SSO org. This should be used in conjuction with policues to enforce periodic access token refreshes. Assumes you have a Github Enterprise account.
 
 ## Description
-Github offers both MFA and SSO for web access options which enable robust security, but github do not offer a similar security level on the command line. Rather github allow users to create long lived personal access tokens (PATs) which, if stolen, could be resused for long periods of time without detection. The tokens cannot be set to expire. IP Whitelisting is the only viable solution to this problem. But leveraging a VPN for everyday coding tasks seems excessive.
+Github offers both SSO for web access options which enable robust security, but github do not offer a similar security level on the command line. Rather github allow users to create long lived personal access tokens (PATs) which, if stolen, could be resused for long periods of time without detection. The tokens cannot be set to expire. IP Whitelisting is the only viable solution to this problem. But leveraging a VPN for everyday coding tasks seems excessive and not applicable for all enterprises.
 
-One possible solution is to enforce a revocation policy (daily, weekly, every 48 hours, whatever) in which all PATs in a SAML SSO org are revoked. This would require a deverloper to update her access token periodically. This project attempts to solve a portion of this problem via a command line script which deletes all PATs in an SAML SSO org or just PATs fo certain users.
+One possible solution is to enforce a revocation policy (daily, weekly, every 48 hours, whatever) in which all PATs in a SAML SSO org are revoked. This would require a developer to update her access token periodically. This project attempts to solve a portion of this problem via a command line script which deletes all PATs in an SAML SSO org or just PATs for certain memebrs of the org.
 
 ## Usage
 ### To list tokens, run this command:
